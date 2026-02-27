@@ -1,0 +1,15 @@
+{
+  "admin": {
+    "username": "sx_t",
+    "password": "$2a$10$C/zdr7go9B5aeE7EmlnbpejKgzDAkJUX1nRnqM5rdPQyah65/OI8m"
+  },
+  "staff": [
+    {
+      "id": 1771896254057,
+      "name": "فـهـد الـرشـيـدي",
+      "rank": "𝐓𝐫𝐮𝐬𝐭𝐞𝐝",
+      "discord_id": "1398319234244804662",
+      "image": "/uploads/1771896253992-0.668636197426792.gif"
+    }
+  ]
+}
