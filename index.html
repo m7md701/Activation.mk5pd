@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MK5 | صـفـحـة الـنـظـام الـرئـيـسـيـة</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ===== الهيدر ===== -->
+  <div class="header">
+  <div id="homeNotice" class="notice bad" style="display:none; margin-top:14px;"></div>
+
+    <div class="brand">
+      <img src="/img/logo.png" alt="logo">
+      <div>
+        <div class="title">𝐄𝐥𝐞𝐜𝐭𝐫𝐨𝐧𝐢𝐜 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐢𝐨𝐧 𝐒𝐲𝐬𝐭𝐞𝐦 | 𝐌𝐊𝟓</div>
+        <div class="sub">الـواجـهـة الـرئـيـسـيـة لـلـنـظـام</div>
+      </div>
+    </div>
+
+    <div class="nav" id="navArea">
+
+      <!-- متجر المدينة -->
+      <a href="https://mk5sa.rzq.sa/" target="_blank" class="btn">
+        زر مـتـجـر الـمـديـنـة
+      </a>
+
+      <!-- الانضمام للديسكورد -->
+      <a href="https://discord.gg/mk5" target="_blank" class="btn">
+        انـضـم إلـى الـديـسـكـورد
+      </a>
+
+      <!-- زر ديناميكي (يتغير حسب تسجيل الدخول) -->
+      <a id="authBtn" class="btn primary" href="/auth/login">
+        تـسـجـيـل الـدخـول بـالـنـظـام
+      </a>
+
+      <script>
+      (function(){
+      const p = new URLSearchParams(location.search);
+      const cooldown = p.get("cooldown");
+      const wait = p.get("wait") || "خـمـس دقـائـق";
+
+     if(cooldown){
+     const box = document.getElementById("homeNotice");
+     if(box){
+      box.style.display = "block";
+      box.textContent = `رسـبـت بـالاخـتـبـار يـرجـى الانـتـظـار  ${wait} قـبـل إعـادة الـمـحـاولـة`;
+     }
+     }
+     })();
+
+</script>
+
+    </div>
+
+  </div>
+
+  <!-- ===== المحتوى ===== -->
+  <div class="card">
+
+    <h1>نـظـام التـفـعـيـل الإلـكـتـرونـي الـحـديـث - MK5</h1>
+
+    <div class="sep"></div>
+
+    <p class="muted" style="line-height:1.9;">
+      مـرحـبـاً بـك فـي نـظـام الـتـفـعـيـل الـرسـمـي لـسـيـرفـر مـود الـشـرطـة ام كـي فـايـف
+      تـم إنـشـاء هـذا الـنـظـام لاعـتـمـاد الـلاعـبـيـن الـراغـبـيـن فـي الانـضـمـام
+      إلـى الـمـديـنـة بـشـكـل آلي وسـلـس وآمـن
+    </p>
+
+    <div class="sep"></div>
+
+    <h2>آلـيـة الـتـفـعـيـل :</h2>
+
+    <ul style="line-height:2;">
+      <li>تـسـجـيـل الـدخـول عـبـر حـسـاب ديـسـكـورد الـخـاص بـك</li>
+      <li> اجـتـيـاز اخـتـبـار الـتـفـعـيـل الـ 10 اسـألـة</li>
+      <li>اخـتـيـار الـقـطـاع الـعـسـكـري الـمـنـاسـب لـك</li>
+      <li>إدخـال الاسـم الـثـنـائـي الـحـقـيـقـي</li>
+      <li>اسـتـلام الـرول الـمـعـتـمـد داخـل الـسـيـرفـر</li>
+    </ul>
+
+    <div class="sep"></div>
+
+    <h2>ملاحظات هـامـة جـدا :</h2>
+
+    <ul style="line-height:2;">
+      <li>يـجـب كـتـابـة الاسـم الـحـقـيـقـي بـشـكـل كـامـل وواضـح</li>
+      <li>فـي حـال الـرسـوب يـمـكـنـك إعـادة الـمـحـاولـة بـعـد 5 دقـائـق</li>
+      <li>يـمـنـع إعـادة الـتـفـعـيـل إذا كـنـت مـفـعـل مـسـبـقـاً</li>
+      <li>يـجـب عـلـيـك الـتـواجـد فـي ديـسـكـورد الـمـديـنـة قـبـل تـسـجـيل دخـولـك</li>
+    </ul>
+
+  </div>
+
+</div>
+
+<script>
+
+// نتحقق هل المستخدم مسجل دخول
+async function checkLogin() {
+
+  try {
+
+    const r = await fetch("/api/me");
+
+    if (!r.ok) return; // غير مسجل
+
+    const data = await r.json();
+
+    // إذا وصلنا هنا يعني مسجل دخول
+    const btn = document.getElementById("authBtn");
+
+    btn.textContent = "بـدء الـتـفـعـيـل الإلـكـتـرونـي";
+    btn.href = "/rules.html";
+
+  } catch(e) {
+  }
+
+}
+
+checkLogin();
+
+</script>
+
+</body>
+</html>

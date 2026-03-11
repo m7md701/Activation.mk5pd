@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MK5 | صـفـحـة اخـتـيـار الـقـطـاع</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">
+      <img src="/img/logo.png" alt="logo">
+      <div>
+        <div class="title">𝐄𝐥𝐞𝐜𝐭𝐫𝐨𝐧𝐢𝐜 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐢𝐨𝐧 𝐒𝐲𝐬𝐭𝐞𝐦 | 𝐌𝐊𝟓</div>
+        <div class="sub">صـفـحـة اخـتـيـار الـقـطـاع الـعـسـكـري</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="logoutBtn">تـسـجـيـل خـروج والـعـودة لـلـرئـيـسـيـة</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h1>اخـتـر قـطـاعـك الـعـسـكـري الـذي تـريـد الـمـبـاشـرة بـه</h1>
+    <p class="muted">يـمـكـنـك اخـتـيـار قـطـاع واحـد فـقـط بـ ضـغـطـك لـخـيـار الـقـطـاع الـمـراد</p>
+    <div class="sep"></div>
+
+    <div id="notice" class="notice" style="display:none;"></div>
+    <div id="sectors" class="sector-grid"></div>
+
+    <script>
+async function loadUserBox(){
+  const r = await fetch("/api/me");
+  if(!r.ok) return;
+
+  const data = await r.json();
+  if(!data.user) return;
+
+  document.getElementById("userAvatar").src = data.user.avatarUrl;
+  document.getElementById("userName").textContent = data.user.username;
+  document.getElementById("userId").textContent = "ID: " + data.user.id;
+  document.getElementById("userBox").style.display = "flex";
+}
+
+loadUserBox();
+</script>
+
+  </div>
+
+</div>
+
+<script>
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await fetch("/auth/logout", {method:"POST"});
+  location.href="/";
+};
+
+async function loadSectors(){
+
+  const me = await fetch("/api/me");
+  if(!me.ok) return location.href="/";
+
+  const data = await me.json();
+
+  const sectorsBox = document.getElementById("sectors");
+
+  const sectors = [
+    { key:"patrol", name: "قـطـاع الادارة الـعـامـة لـدوريـات الامـن ┆"  },
+    { key:"traffic", name:"قـطـاع الادارة الـعـامـة لـلـمـرور ┆" },
+    { key:"roads", name:"قـطـاع الادارة الـعـامـة لأمـن الـطـرق ┆" },
+    { key:"governorates", name:"الـمـديـريـة الـعـامـة لـشـرطة الـمـحـافـظـات ┆" }
+  ];
+
+sectors.forEach(sec => {
+
+  const btn = document.createElement("button");
+  btn.className = "sector-btn";
+
+  btn.innerHTML = `
+    <div class="sector-content">
+      <img src="/img/sector-${sec.key}.png" class="sector-img">
+      <span>${sec.name}</span>
+    </div>
+  `;
+
+  btn.onclick = async () => {
+
+    const r = await fetch("/api/sector/select", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ sectorKey: sec.key })
+    });
+
+    const res = await r.json();
+
+    if(res.redirect){
+      location.href = res.redirect;
+    }
+
+  };
+
+  sectorsBox.appendChild(btn);
+});
+
+}
+
+loadSectors();
+
+</script>
+</body>
+</html>

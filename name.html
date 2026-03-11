@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MK5 | صـفـحـة ادخـال الاسـم</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">
+      <img src="/img/logo.png" alt="logo">
+      <div>
+        <div class="title">𝐄𝐥𝐞𝐜𝐭𝐫𝐨𝐧𝐢𝐜 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐢𝐨𝐧 𝐒𝐲𝐬𝐭𝐞𝐦 | 𝐌𝐊𝟓</div>
+        <div class="sub">واجـهـة ادحـال اسـم الـمـتـفـعـل</div>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn" id="logoutBtn">تـسـجـيـل خـروح والـعـودة لـلـصـفـحـة الـرئـيـسـيـة</button>
+    </div>
+  </div>
+
+  <div class="card">
+
+    <h1>ادخـل اسـمـك الـثـنـائـي</h1>
+    <p class="muted">يـجـب إدخـال الاسـم الـحـقـيـقـي بـشـكـل واضـح </p>
+
+    <div class="sep"></div>
+
+    <div id="notice" class="notice" style="display:none;"></div>
+
+    <input id="firstName" class="input" placeholder="ادخـل الاسـم الاول هـنـا">
+    <br><br>
+    <input id="lastName" class="input" placeholder="ادخـل الاسـم الـثـانـي هـنـا">
+
+    <div class="sep"></div>
+
+    <button class="btn primary" id="submitName">اعـتـمـاد الاسـم والارسـال</button>
+
+  </div>
+
+</div>
+
+<script>
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await fetch("/auth/logout", {method:"POST"});
+  location.href="/";
+};
+
+function containsAbu(text){
+  const t = text.toLowerCase().replace(/\s+/g,"");
+    return t.includes("ابو") 
+  || t.includes("أبو") 
+  || t.includes("كس") 
+  || t.includes("مجلخ") 
+  || t.includes("العراب") 
+  || t.includes("نايكم") 
+  || t.includes("الزق") 
+  || t.includes("زق") 
+  || t.includes("تبن") 
+  || t.includes("التبن") 
+  || t.includes("حيوان") 
+  || t.includes("الحيوان") 
+  || t.includes("الفيمبوي") 
+  || t.includes("الديوث") 
+  || t.includes("المكسكس") 
+  || t.includes("المزبزب") 
+  || t.includes("اه") 
+  || t.includes("عاهرة") 
+  || t.includes("عاهره") 
+  || t.includes("الحيوان") 
+  || t.includes("عرابكم");
+}
+
+document.getElementById("submitName").onclick = async () => {
+
+  const firstName = document.getElementById("firstName").value.trim();
+  const lastName  = document.getElementById("lastName").value.trim();
+  const notice = document.getElementById("notice");
+
+  notice.style.display="none";
+
+  if(!firstName || !lastName){
+    notice.style.display="block";
+    notice.className="notice bad";
+    notice.textContent="يـجـب عـلـيـك إدخـال الاسـم الأول والـثـانـي";
+    return;
+  }
+
+  if(containsAbu(firstName) || containsAbu(lastName)){
+    notice.style.display="block";
+    notice.className="notice bad";
+    notice.textContent="لـديـك كـلـمـة مـمـنـوعـة يـجـب كـتـابـة الاسـم الـثـنـائـي الـحـقـيـقـي";
+    return;
+  }
+
+  document.getElementById("submitName").disabled=true;
+
+  try{
+
+    const r = await fetch("/api/name/submit", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ firstName, lastName })
+    });
+
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok){
+      document.getElementById("submitName").disabled=false;
+
+      notice.style.display="block";
+      notice.className="notice bad";
+
+      if(data.error==="ABU_BLOCKED"){
+        notice.textContent="لـديـك كـلـمـة مـمـنـوعـة يـجـب كـتـابـة الاسـم الـثـنـائـي الـحـقـيـقـي";
+      } else {
+        notice.textContent="حدث خطأ.";
+      }
+
+      return;
+    }
+
+    if(data.redirect){
+      location.href=data.redirect;
+      return;
+    }
+
+  }catch(e){
+    document.getElementById("submitName").disabled=false;
+    notice.style.display="block";
+    notice.className="notice bad";
+    notice.textContent="فشل الاتصال.";
+  }
+};
+
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MK5 | تقرير التفعيل</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">
+      <img src="/img/logo.png" alt="logo">
+      <div>
+        <div class="title">𝐄𝐥𝐞𝐜𝐭𝐫𝐨𝐧𝐢𝐜 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐢𝐨𝐧 𝐒𝐲𝐬𝐭𝐞𝐦 | 𝐌𝐊𝟓</div>
+        <div class="sub">واجـهـة تـقـاريـر الـتـفـعـيـل</div>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="btn" href="/">الـعـودة لـلـرئـيـسـيـة</a>
+      <button class="btn" id="logoutBtn">تـسـجـيـل خـروج والـعـودة لـلـرئـيـسـيـة</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h1>تـم تـفـعـيـلـك وتـسـيـلـمـك رولاتـك بـنـجـاح ┆ ✅</h1>
+    <p class="muted">هـذا تـقـريـر تـفـعـيـلـك بـالـكـامـل |  سـيـتـم مـنـحـك الـكـود الـعـسـكـري عـلـى اسـمـك الـثـنـائـي في أقـرب وقـت مـن قـبـل طـاقـم الـعـمـل</p>
+    <div class="sep"></div>
+
+    <div id="report" class="muted"></div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById("logoutBtn").onclick = async () => {
+  await fetch("/auth/logout", {method:"POST"});
+  location.href="/";
+};
+
+async function load(){
+  const r = await fetch("/api/report");
+  if(!r.ok) return location.href="/";
+  const d = await r.json();
+
+  const avatar = d.user.avatarUrl ? `<img src="${d.user.avatarUrl}" style="width:70px;height:70px;border-radius:16px;border:1px solid rgba(255,255,255,.15);">` : "";
+
+  document.getElementById("report").innerHTML = `
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px;">
+      ${avatar}
+      <div>
+        <div style="font-weight:800;font-size:18px;">${d.user.username}</div>
+        <div style="opacity:.8;">Discord ID : ${d.user.id}</div>
+      </div>
+    </div>
+
+    <div style="line-height:2;">
+      <div><b>الاسـم الـثـنـائـي :</b> ${d.fullName  || "—"}</div>
+      <div><b>قـطـاعـك الـذي تـم اخـتـيـاره :</b> ${d.sectorName || "—"}</div>
+      <div><b>الـنـسـبـة الـمـئـويـة لـلاخـتـبـار :</b> ${d.score}%</div>
+      <div><b>الـوقـت الـمـسـتـغـرق لـلـتـفـعـيـل :</b> ${d.timeTakenText}</div>
+    </div>
+  `;
+}
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MK5 | صـفـحـة اخـتـبـار الـتـفـعـيـل</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="brand">
+      <img src="/img/logo.png" alt="logo">
+      <div>
+        <div class="title">𝐄𝐥𝐞𝐜𝐭𝐫𝐨𝐧𝐢𝐜 𝐀𝐜𝐭𝐢𝐯𝐚𝐭𝐢𝐨𝐧 𝐒𝐲𝐬𝐭𝐞𝐦 | 𝐌𝐊𝟓</div>
+        <div class="sub">اخـتـبـار اسـألـة الـتـفـعـيـل</div>
+      </div>
+    </div>
+    <div class="nav">
+      <a class="btn" href="/">الـعـود لـلـصـفـحـة الـرئـيـسـيـة</a>
+      <button class="btn" id="logoutBtn">تـسـجـيـل خـروج والـعـود لـلـرئـيـسـيـة</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h1>هـنـا تـسـتـطـيـع بـدء اخـتـبـارك</h1>
+    <p class="muted">امـامـك عـشـر اسـالـة يـجـب حـل اكـثـر مـن اربـع اسـألـة عـلـى الاقـل كـي تـنـجـح</p>
+
+    <div class="sep"></div>
+
+    <div id="notice" class="notice" style="display:none;"></div>
+    <div id="quizArea"></div>
+
+    <div class="sep"></div>
+
+    <button class="btn primary" id="submitBtn">ارسـال واعـتـمـاد الأجـوبـة</button>
+  </div>
+
+</div>
+
+<script>
+
+document.getElementById("logoutBtn").onclick = async () => {
+  await fetch("/auth/logout", { method:"POST" });
+  location.href="/";
+};
+
+let quiz = null;
+
+async function loadQuiz(){
+
+  const me = await fetch("/api/me");
+  if(!me.ok) return location.href="/";
+
+  const r = await fetch("/api/quiz");
+
+  if(!r.ok){
+    const e = await r.json().catch(()=>({}));
+
+    if(e.redirect){
+      location.href = e.redirect;
+      return;
+    }
+
+    location.href = "/?cooldown=1";
+    return;
+  }
+
+  quiz = await r.json();
+  renderQuiz();
+}
+
+function renderQuiz(){
+  const box = document.getElementById("quizArea");
+  box.innerHTML = "";
+
+  quiz.questions.forEach((q, i) => {
+
+    const el = document.createElement("div");
+    el.className = "q";
+
+    el.innerHTML = `
+      <div class="qt">${i+1}) ${q.q}</div>
+      <div class="opts">
+        ${q.options.map((op, idx)=>`
+          <label class="opt">
+            <input type="radio" name="q${i}" value="${idx}">
+            <span>${op}</span>
+          </label>
+        `).join("")}
+      </div>
+    `;
+
+    box.appendChild(el);
+  });
+}
+
+function getAnswers(){
+  const answers = [];
+
+  for(let i=0;i<quiz.total;i++){
+    const pick = document.querySelector(`input[name="q${i}"]:checked`);
+    answers.push(pick ? Number(pick.value) : -1);
+  }
+
+  return answers;
+}
+
+document.getElementById("submitBtn").onclick = async () => {
+
+  const answers = getAnswers();
+  const notice = document.getElementById("notice");
+  notice.style.display="none";
+
+  if(answers.includes(-1)){
+    notice.style.display="block";
+    notice.className="notice bad";
+    notice.textContent="يـجـب الإجـابـة عـلـى جـمـيـع الأسـئـلـة";
+    return;
+  }
+
+  document.getElementById("submitBtn").disabled = true;
+
+  try{
+
+    const r = await fetch("/api/quiz/submit", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ answers })
+    });
+
+    const data = await r.json().catch(()=>({}));
+
+    if(!r.ok){
+      document.getElementById("submitBtn").disabled=false;
+
+      notice.style.display="block";
+      notice.className="notice bad";
+
+      if(data.cooldownText){
+        notice.textContent=`لايـمـكـنـك الـمـحـاولـة حـالـيـا انـتـظـر قـلـيـلا: ${data.cooldownText}`;
+      } else if(data.error==="ALREADY_ACTIVATED"){
+        notice.textContent="أنـت مـفـعـل مـسـبـقـاً";
+      } else {
+        notice.textContent="حـدث خـطـاء مـا حـاول مـرة اخـرى";
+      }
+
+      return;
+    }
+
+    if(data.redirect){
+      location.href=data.redirect;
+      return;
+    }
+
+  }catch(e){
+    document.getElementById("submitBtn").disabled=false;
+    notice.style.display="block";
+    notice.className="notice bad";
+    notice.textContent="فـشـل الاتـصـال بـالـسـيـرفـر حـاول مـرة اخـرى";
+  }
+};
+
+loadQuiz();
+
+</script>
+</body>
+</html>
